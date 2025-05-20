@@ -1,16 +1,30 @@
 import { Link, useNavigate } from 'react-router-dom'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import useGlobalReducer from '../hooks/useGlobalReducer'
+import { addContact, putContact} from '../service/contact'
 
-export const AddContact = () => {
+const INITIAL_STATE = {
+    name: '',
+    email: '',
+    phone: '',
+    address: ''
+}
+
+export const AddContact = ({type}) => {
+    const {store} = useGlobalReducer();
+    console.log(type)
+
+    const isEdit = type === 'edit';
 
     const navigate = useNavigate();
 
-    const [contact, setContact] = useState({
-        name: '',
-        email: '',
-        phone: '',
-        address: ''
-    });
+    const [contact, setContact] = useState(INITIAL_STATE);
+
+    useEffect(()=>{
+        console.log(store)
+        const contactState = isEdit ? store.contact : INITIAL_STATE;
+        setContact(contactState)
+    },[])
 
     const onChange = (event) => {
 
@@ -22,26 +36,26 @@ export const AddContact = () => {
 
     const onSubmit = async (event) => {
         event.preventDefault();
+        
+        if(isEdit){
+            await editContact()
+            navigate('/')
+            return;
+        }
+
         await createContact()
         navigate('/')
+        return
+
+        
     }
 
-    const createContact = async () =>{
-        try {
-            const response = await fetch('https://playground.4geeks.com/contact/agendas/otazzu/contacts',{
-                method: 'POST',
-                headers:{
-                    'Content-type': 'application/json',
-                
-                },
-                body: JSON.stringify(contact),
-            });
+    const createContact = async () => {
+        await addContact(contact)
+    }
 
-            console.log(response)
-            
-        } catch (error) {
-            console.log('ERROR IN CREATE CONCTACT', error)
-        }
+    const editContact = async () =>{
+        await putContact(contact)
     }
 
     return (
@@ -51,17 +65,17 @@ export const AddContact = () => {
             </div>
             <form onChange={onChange} onSubmit={onSubmit} className='m-5'>
                 <div className="mb-3">
-                    <label htmlFor="fullName" className="form-label">Full Name</label>
-                    <input type="text" className="form-control" name="name" placeholder="Full name" />
+                    <label htmlFor="name" className="form-label">Full Name</label>
+                    <input type="text" value={contact.name} className="form-control" name="name" placeholder="Full name" />
 
                     <label htmlFor="email" className="form-label">Email</label>
-                    <input type="email" className="form-control" name="email" placeholder="Enter email" />
+                    <input type="email" value={contact.email} className="form-control" name="email" placeholder="Enter email" />
 
                     <label htmlFor="phone" className="form-label">Phone</label>
-                    <input type="number" className="form-control" name="phone" placeholder="Enter phone" />
+                    <input type="number" value={contact.phone} className="form-control" name="phone" placeholder="Enter phone" />
 
                     <label htmlFor="address" className="form-label">Address</label>
-                    <input type="text" className="form-control" name="address" placeholder="Enter Address" />
+                    <input type="text" value={contact.address} className="form-control" name="address" placeholder="Enter Address" />
                     <div className="d-grid gap-2 mt-3">
                         <button type="submit" className="btn btn-primary mb-3">Save</button>
                     </div>

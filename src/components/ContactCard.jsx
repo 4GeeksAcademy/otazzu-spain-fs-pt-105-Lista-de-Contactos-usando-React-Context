@@ -1,4 +1,4 @@
-export const ContactCard = ({contact, deleteContact}) => {
+export const ContactCard = ({contact, deleteContact, editContact}) => {
 
     const {name, email, phone, address, id} = contact
 
@@ -17,6 +17,7 @@ export const ContactCard = ({contact, deleteContact}) => {
                     </div>
                     <div>
                         <button onClick={()=>deleteContact(id)}>Delete</button>
+                        <button onClick={()=>editContact(contact)}>Edit</button>
                     </div>
                 </div>
             </div>
