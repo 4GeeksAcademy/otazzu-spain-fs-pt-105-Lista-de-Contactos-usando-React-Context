@@ -54,7 +54,7 @@ export const Home = () => {
 	}, [])
 
 	return (
-		<div>
+		<div className='min-vh-100'>
 			<div className="d-flex justify-content-end m-5">
 				<Link to="/add-contact" className="btn btn-success">Add contact</Link>
 			</div>
