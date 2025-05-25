@@ -1,12 +1,42 @@
-const URL = 'https://playground.4geeks.com/contact/agendas/otazzu/contacts'
+const URL = 'https://playground.4geeks.com/contact/agendas/otazzu'
+
+const createSlug = async () => { // Funcion de crear el slug si no existe
+
+    try {
+        const response = await fetch(URL, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                "name": "otazzu",
+                "id": 0
+            })
+        });
+
+        if (response.status === 201) {
+            getContactList();
+        }
+
+    } catch (error) {
+        console.log(error)
+    }
+
+}
 
 export const getContactList = async () => {
     try {
 
         const response = await fetch(URL)
-        const data = await response.json()
-        console.log(data)
-        return data.contacts;
+
+        if (response.ok) {
+            const data = await response.json()
+            console.log(data)
+            return data.contacts;
+        }
+        else if (response.status === 404) {//Si no existe el slug
+            createSlug();//Se crea
+        }
 
     } catch (error) {
 
@@ -18,7 +48,7 @@ export const getContactList = async () => {
 export const deleteContactById = async (id) => {
     try {
 
-        const response = await fetch(`${URL}/${id}`, {
+        const response = await fetch(`${URL}/contacts/${id}`, {
             method: 'DELETE'
         })
         console.log(response)
@@ -33,7 +63,7 @@ export const deleteContactById = async (id) => {
 
 export const addContact = async (contact) => {
     try {
-        const response = await fetch(`${URL}}`, {
+        const response = await fetch(`${URL}/contacts`, {
             method: 'POST',
             headers: {
                 'Content-type': 'application/json',
@@ -42,17 +72,17 @@ export const addContact = async (contact) => {
             body: JSON.stringify(contact),
         });
 
-        return 'Create contact'
+        return 'Created contact'
 
     } catch (error) {
         console.log('ERROR IN CREATE CONCTACT', error)
     }
 }
 
-export const putContact = async (contact) =>{
+export const putContact = async (contact) => {
 
     try {
-        const response = await fetch(`${URL}/${contact.id}`, {
+        const response = await fetch(`${URL}/contacts/${contact.id}`, {
             method: 'PUT',
             headers: {
                 'Content-type': 'application/json',
@@ -61,10 +91,9 @@ export const putContact = async (contact) =>{
             body: JSON.stringify(contact),
         });
 
-        if(response.status === 200){
+        if (response.status === 200) {
             return 'Edit contact'
         }
-        
 
     } catch (error) {
         console.log('ERROR IN EDIT CONCTACT', error)

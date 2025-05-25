@@ -1,7 +1,9 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useState, useEffect } from 'react'
 import useGlobalReducer from '../hooks/useGlobalReducer'
-import { addContact, putContact} from '../service/contact'
+import { addContact, putContact } from '../service/contact'
+import { SuccessContact } from '../components/SuccessContact'
+import { Spinner } from '../components/Spinner'
 
 const INITIAL_STATE = {
     name: '',
@@ -10,9 +12,8 @@ const INITIAL_STATE = {
     address: ''
 }
 
-export const AddContact = ({type}) => {
-    const {store} = useGlobalReducer();
-    console.log(type)
+export const AddContact = ({ type }) => {
+    const { store } = useGlobalReducer();
 
     const isEdit = type === 'edit';
 
@@ -20,11 +21,15 @@ export const AddContact = ({type}) => {
 
     const [contact, setContact] = useState(INITIAL_STATE);
 
-    useEffect(()=>{
+    const [loading, setLoading] = useState(false);
+
+    const [showModal, setShowModal] = useState(false);
+
+    useEffect(() => {
         console.log(store)
         const contactState = isEdit ? store.contact : INITIAL_STATE;
         setContact(contactState)
-    },[])
+    }, [])
 
     const onChange = (event) => {
 
@@ -36,30 +41,33 @@ export const AddContact = ({type}) => {
 
     const onSubmit = async (event) => {
         event.preventDefault();
-        
-        if(isEdit){
+        setLoading(true)
+        if (isEdit) {
             await editContact()
             navigate('/')
             return;
         }
-
+        setShowModal(true)
         await createContact()
-        navigate('/')
+        setTimeout(() => {
+            navigate('/')
+            setLoading(false)
+            setShowModal(false)
+        }, 5000)
         return
-
-        
     }
 
     const createContact = async () => {
         await addContact(contact)
     }
 
-    const editContact = async () =>{
+    const editContact = async () => {
         await putContact(contact)
     }
 
     return (
         <div>
+            {showModal && <SuccessContact/>}
             <div className='text-center m-3'>
                 <h1>Add a new Contact</h1>
             </div>
@@ -77,11 +85,11 @@ export const AddContact = ({type}) => {
                     <label htmlFor="address" className="form-label">Address</label>
                     <input type="text" value={contact.address} className="form-control" name="address" placeholder="Enter Address" />
                     <div className="d-grid gap-2 mt-3">
-                        <button type="submit" className="btn btn-primary mb-3">Save</button>
+                        {loading ? <Spinner /> : <button type="submit" className="btn btn-primary">Save</button>}
                     </div>
+                    <Link to="/">or get back to contacts</Link>
                 </div>
             </form>
-            <Link to="/">Back to home</Link>
         </div>
     )
 }
